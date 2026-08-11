@@ -1,0 +1,251 @@
+---
+import { PRESS_MENTIONS, PRESS_STYLES, QUOTES, RATING } from "../data/testimonials";
+---
+
+<div class="reviews-bar">
+  <div class="rating">
+    <span class="stars" aria-hidden="true">
+      {Array.from({ length: 5 }).map(() => (
+        <svg viewBox="0 0 24 24">
+          <path d="M12 1.6l3.24 6.56 7.24 1.05-5.24 5.11 1.24 7.22L12 17.9l-6.48 3.64 1.24-7.22-5.24-5.11 7.24-1.05z" />
+        </svg>
+      ))}
+    </span>
+    <span class="rating-label">{RATING.value} · {RATING.count.toLocaleString()} reviews</span>
+  </div>
+
+  <div class="quotes" role="region" aria-label="Customer reviews" aria-live="polite">
+    <span class="quote-mark" aria-hidden="true">&ldquo;</span>
+    {
+      QUOTES.map((quote, i) => (
+        <p class="quote" data-slide={i} data-active={i === 0 ? "true" : undefined}>
+          "{quote}"
+        </p>
+      ))
+    }
+  </div>
+
+  <div class="press" role="tablist" aria-label="Choose review by publication">
+    <span class="press-heading">As seen in</span>
+    {
+      PRESS_MENTIONS.map((name, i) => (
+        <button
+          type="button"
+          class={`press-item press-item--${PRESS_STYLES[i]}`}
+          data-goto={i}
+          aria-current={i === 0 ? "true" : "false"}
+        >
+          {name}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>(".reviews-bar");
+  const quotes = bar?.querySelector<HTMLElement>(".quotes");
+  const slides = Array.from(bar?.querySelectorAll<HTMLElement>(".quote") ?? []);
+  const tabs = Array.from(bar?.querySelectorAll<HTMLButtonElement>(".press-item") ?? []);
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function show(index: number) {
+    const target = ((index % slides.length) + slides.length) % slides.length;
+    slides.forEach((slide, i) => {
+      if (i === target) slide.setAttribute("data-active", "true");
+      else slide.removeAttribute("data-active");
+    });
+    tabs.forEach((tab, i) => {
+      tab.setAttribute("aria-current", String(i === target));
+    });
+  }
+
+  function current() {
+    return slides.findIndex((slide) => slide.hasAttribute("data-active"));
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      show(Number(tab.dataset.goto));
+      restart();
+    });
+  });
+
+  let timer: number | undefined;
+
+  function start() {
+    if (reduceMotion) return;
+    timer = window.setInterval(() => show(current() + 1), 8000);
+  }
+
+  function stop() {
+    window.clearInterval(timer);
+  }
+
+  function restart() {
+    stop();
+    start();
+  }
+
+  quotes?.addEventListener("mouseenter", stop);
+  quotes?.addEventListener("mouseleave", start);
+  quotes?.addEventListener("focusin", stop);
+  quotes?.addEventListener("focusout", start);
+
+  start();
+</script>
+
+<style>
+  .reviews-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    max-width: 30rem;
+  }
+
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .stars {
+    display: inline-flex;
+    gap: 0.1rem;
+  }
+
+  .stars svg {
+    width: 0.7rem;
+    height: 0.7rem;
+    fill: #ffd700;
+  }
+
+  .rating-label {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+
+  .quotes {
+    position: relative;
+    width: 100%;
+    min-height: 2.6rem;
+  }
+
+  .quote-mark {
+    position: absolute;
+    top: -1.1rem;
+    left: -0.9rem;
+    font-family: georgia, serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--color-border);
+    z-index: 0;
+    line-height: 1;
+  }
+
+  .quote {
+    position: relative;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-ink);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .quote:not([data-active="true"]) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .quote[data-active="true"] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease;
+  }
+
+  .press {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1.4rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .press {
+      gap: 0.35rem 1.15rem;
+      font-size: 0.75rem;
+    }
+
+    .press-item[aria-current="true"] {
+      transform: scale(1.08);
+    }
+  }
+
+  .press-heading {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+  }
+
+  .press-item {
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--color-ink);
+    opacity: 0.35;
+    cursor: pointer;
+    transform: scale(1);
+    transform-origin: left center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .press-item[aria-current="true"] {
+    opacity: 1;
+    color: var(--color-accent);
+    transform: scale(1.15);
+  }
+
+  .press-item--news {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .press-item--weekly {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .press-item--who {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+  }
+
+  .press-item--marie-claire {
+    font-family: var(--font-serif);
+    text-transform: lowercase;
+    letter-spacing: 0.03em;
+  }
+
+  .press-item--mamamia {
+    font-family: var(--font-sans);
+    font-weight: 700;
+  }
+
+  .press-item--bazaar {
+    font-family: var(--font-serif);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+</style>

@@ -1,10 +1,8 @@
 ---
-import { Image } from "astro:assets";
-
-import { PERFUMES, SCENT_FAMILIES } from "../data/perfumes";
+import HeroRotator from "./HeroRotator.astro";
+import ReviewsBar from "./ReviewsBar.astro";
 
 const base = import.meta.env.BASE_URL;
-const featured = PERFUMES.find((p) => p.slug === "bliss-release")!;
 ---
 
 <section class="hero">
@@ -19,13 +17,9 @@ const featured = PERFUMES.find((p) => p.slug === "bliss-release")!;
       <a class="cta primary" href={`${base}perfumes/`}>See all perfumes</a>
       <a class="cta secondary" href="#categories">Shop by scent</a>
     </div>
+    <ReviewsBar />
   </div>
-  <a class="art" href={featured.sourceUrl} target="_blank" rel="noopener noreferrer">
-    <Image src={featured.image.src} alt={featured.image.alt} width={480} height={480} />
-    <span class="caption">
-      {featured.name} — {SCENT_FAMILIES[featured.family].name}, ${featured.price}
-    </span>
-  </a>
+  <HeroRotator />
 </section>
 
 <style>
@@ -37,6 +31,13 @@ const featured = PERFUMES.find((p) => p.slug === "bliss-release")!;
     gap: var(--space-4);
     grid-template-columns: 1fr;
     align-items: center;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .hero {
+      padding: var(--space-1) var(--space-3);
+      gap: var(--space-1);
+    }
   }
 
   @media (min-width: 48rem) {
@@ -57,6 +58,16 @@ const featured = PERFUMES.find((p) => p.slug === "bliss-release")!;
     margin-top: var(--space-2);
   }
 
+  .copy > :global(.reviews-bar) {
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 47.9375rem) {
+    .copy > :global(.reviews-bar) {
+      margin-top: var(--space-1);
+    }
+  }
+
   .cta {
     display: inline-block;
     padding: 0.6rem 1.25rem;
@@ -73,29 +84,5 @@ const featured = PERFUMES.find((p) => p.slug === "bliss-release")!;
   .cta.secondary {
     border: 1px solid var(--color-border);
     color: var(--color-ink);
-  }
-
-  .art {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    max-width: 22rem;
-    margin: 0 auto;
-  }
-
-  .art img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 0.5rem;
-  }
-
-  .caption {
-    display: block;
-    margin-top: var(--space-1);
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    text-align: center;
   }
 </style>
