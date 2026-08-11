@@ -19,8 +19,8 @@ const genderLabel = perfume.genders
   </a>
   <div class="body">
     <div class="badges">
-      <span class="badge family">{SCENT_FAMILIES[perfume.family].name}</span>
-      <span class="badge gender">{genderLabel}</span>
+      <span class={`badge family-${perfume.family}`}>{SCENT_FAMILIES[perfume.family].name}</span>
+      <span class={`badge gender-${perfume.genders[0]}`}>{genderLabel}</span>
     </div>
     <h3>{perfume.name}</h3>
     <p class="inspired">Inspired by {perfume.inspiredBy.brand} {perfume.inspiredBy.item}</p>
@@ -78,6 +78,54 @@ const genderLabel = perfume.genders
     color: var(--color-muted);
     background: var(--color-bg);
     border: 1px solid var(--color-border);
+  }
+
+  .family-citrus-fresh {
+    color: #14707a;
+    background: #e3f2f4;
+    border-color: #cbe6e9;
+  }
+
+  .family-floral {
+    color: #a6295f;
+    background: #fbe4ee;
+    border-color: #f4cddf;
+  }
+
+  .family-woody {
+    color: #55642f;
+    background: #eef1e1;
+    border-color: #dde3c9;
+  }
+
+  .family-amber-spice {
+    color: #96581a;
+    background: #fbead4;
+    border-color: #f3d9b0;
+  }
+
+  .family-gourmand {
+    color: #6b5344;
+    background: #efe6e0;
+    border-color: #ddccc0;
+  }
+
+  .gender-women {
+    color: #c15a83;
+    background: #fdeaf0;
+    border-color: #f8d6e2;
+  }
+
+  .gender-men {
+    color: #4c74b8;
+    background: #e9f0fc;
+    border-color: #cfe0f7;
+  }
+
+  .gender-unisex {
+    color: #6f5a95;
+    background: #efeaf6;
+    border-color: #ddd3ee;
   }
 
   h3 {
