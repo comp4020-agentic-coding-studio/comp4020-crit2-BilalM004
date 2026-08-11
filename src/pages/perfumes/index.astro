@@ -1,0 +1,99 @@
+---
+import PerfumeCard from "../../components/PerfumeCard.astro";
+import { PERFUMES, SCENT_FAMILIES, type ScentFamily } from "../../data/perfumes";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const families = (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((slug) => ({
+  slug,
+  info: SCENT_FAMILIES[slug],
+  perfumes: PERFUMES.filter((p) => p.family === slug),
+}));
+---
+
+<BaseLayout title="All Perfumes — Àerre, rebuilt">
+  <section class="intro">
+    <h1>All Perfumes</h1>
+    <p>Every fragrance, grouped by scent family instead of buried under a discount tier.</p>
+    <nav class="jump" aria-label="Jump to scent family">
+      {
+        families.map(({ slug, info }) => (
+          <a href={`#${slug}`}>{info.name}</a>
+        ))
+      }
+    </nav>
+  </section>
+
+  {
+    families.map(({ slug, info, perfumes }) => (
+      <section class="family" id={slug}>
+        <h2>{info.name}</h2>
+        <p class="blurb">{info.blurb}</p>
+        <div class="grid">
+          {perfumes.map((perfume) => (
+            <PerfumeCard perfume={perfume} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-3) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .intro p {
+    max-width: 40rem;
+    color: var(--color-muted);
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .jump a {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .jump a:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .family {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-3) var(--space-4);
+    scroll-margin-top: var(--space-3);
+  }
+
+  .family h2 {
+    margin: 0;
+  }
+
+  .family .blurb {
+    max-width: 40rem;
+    color: var(--color-muted);
+    margin: 0.25rem 0 0;
+  }
+
+  .grid {
+    margin-top: var(--space-2);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+</style>
