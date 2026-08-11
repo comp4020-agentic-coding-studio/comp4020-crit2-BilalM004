@@ -1,23 +1,58 @@
 ---
-import { SCENT_FAMILIES } from "../data/perfumes";
+import { PERFUMES, SCENT_FAMILIES, slugify } from "../data/perfumes";
 
 const base = import.meta.env.BASE_URL;
 const families = Object.entries(SCENT_FAMILIES);
+const genders = [
+  { slug: "women", name: "Women" },
+  { slug: "men", name: "Men" },
+  { slug: "unisex", name: "Unisex" },
+];
+const brands = [...new Set(PERFUMES.map((p) => p.inspiredBy.brand))].sort((a, b) =>
+  a.localeCompare(b),
+);
 ---
 
 <header class="site-header">
   <div class="row">
-    <a class="wordmark" href={base}>Àerre, rebuilt</a>
+    <a class="wordmark" href={base}>
+      <span class="mark">Àerre</span>
+      <span class="tag">(rebuilt)</span>
+    </a>
     <nav aria-label="Primary">
       <a href={base}>Home</a>
       <a href={`${base}perfumes/`}>All Perfumes</a>
       <details class="categories">
-        <summary>Categories</summary>
+        <summary>Scent</summary>
         <ul>
           {
             families.map(([slug, info]) => (
               <li>
                 <a href={`${base}perfumes/${slug}/`}>{info.name}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+      <details class="categories">
+        <summary>Gender</summary>
+        <ul>
+          {
+            genders.map(({ slug, name }) => (
+              <li>
+                <a href={`${base}perfumes/?gender=${slug}`}>{name}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+      <details class="categories">
+        <summary>Inspired By</summary>
+        <ul>
+          {
+            brands.map((brand) => (
+              <li>
+                <a href={`${base}perfumes/?brand=${slugify(brand)}`}>{brand}</a>
               </li>
             ))
           }
@@ -48,11 +83,26 @@ const families = Object.entries(SCENT_FAMILIES);
   }
 
   .wordmark {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    color: var(--color-ink);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
     text-decoration: none;
     white-space: nowrap;
+  }
+
+  .wordmark .mark {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-accent);
+  }
+
+  .wordmark .tag {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-muted);
   }
 
   nav {
