@@ -19,6 +19,14 @@ const brands = [...new Set(PERFUMES.map((p) => p.inspiredBy.brand))].sort((a, b)
 const notes = [
   ...new Set(PERFUMES.flatMap((p) => [...p.notes.top, ...p.notes.heart, ...p.notes.base])),
 ].sort((a, b) => a.localeCompare(b));
+
+const SORT_OPTIONS = [
+  { value: "featured", label: "Featured" },
+  { value: "best-selling", label: "Best Selling" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+  { value: "alpha", label: "Alphabetical, A–Z" },
+];
 ---
 
 <BaseLayout title="All Perfumes — Àerre, rebuilt">
@@ -34,75 +42,102 @@ const notes = [
     <form class="filters" aria-label="Filter and sort perfumes">
       <div class="control search-control">
         <label for="search">Search</label>
-        <input type="search" id="search" name="search" placeholder="Perfume or brand…" autocomplete="off" />
+        <input
+          type="search"
+          id="search"
+          name="search"
+          placeholder="Perfume or brand…"
+          autocomplete="off"
+        />
       </div>
 
-      <fieldset class="control" data-filter="gender">
-        <legend>Gender</legend>
-        <div class="option-list">
+      <details class="control filter-menu">
+        <summary>
+          Filter
+          <span class="badge" id="filter-count" hidden></span>
+        </summary>
+        <div class="panel">
+          <fieldset data-filter="gender">
+            <legend>Gender</legend>
+            <div class="option-list">
+              {
+                GENDERS.map((g) => (
+                  <label class="option">
+                    <input type="checkbox" value={g} />
+                    {GENDER_LABEL[g]}
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset data-filter="family">
+            <legend>Scent family</legend>
+            <div class="option-list">
+              {
+                families.map((slug) => (
+                  <label class="option">
+                    <input type="checkbox" value={slug} />
+                    {SCENT_FAMILIES[slug].name}
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset data-filter="brand">
+            <legend>Inspired by</legend>
+            <div class="option-list">
+              {
+                brands.map((brand) => (
+                  <label class="option">
+                    <input type="checkbox" value={slugify(brand)} />
+                    {brand}
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset class="notes-fieldset" data-filter="notes">
+            <legend>Notes</legend>
+            <div class="option-list notes-list">
+              {
+                notes.map((note) => (
+                  <label class="option">
+                    <input type="checkbox" value={slugify(note)} />
+                    {note}
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <div class="panel-actions">
+            <button type="button" class="text-button clear-filters">Clear all</button>
+            <button type="button" class="apply-filters">View results</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="control sort-menu">
+        <summary>Sort by: <span id="sort-label">Featured</span></summary>
+        <ul class="sort-options">
           {
-            GENDERS.map((g) => (
-              <label class="option">
-                <input type="checkbox" value={g} />
-                {GENDER_LABEL[g]}
-              </label>
+            SORT_OPTIONS.map((opt) => (
+              <li>
+                <button
+                  type="button"
+                  data-sort={opt.value}
+                  aria-pressed={opt.value === "featured" ? "true" : "false"}
+                >
+                  {opt.label}
+                </button>
+              </li>
             ))
           }
-        </div>
-      </fieldset>
-
-      <fieldset class="control" data-filter="family">
-        <legend>Scent family</legend>
-        <div class="option-list">
-          {
-            families.map((slug) => (
-              <label class="option">
-                <input type="checkbox" value={slug} />
-                {SCENT_FAMILIES[slug].name}
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
-      <fieldset class="control" data-filter="brand">
-        <legend>Inspired by</legend>
-        <div class="option-list">
-          {
-            brands.map((brand) => (
-              <label class="option">
-                <input type="checkbox" value={slugify(brand)} />
-                {brand}
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
-      <fieldset class="control notes-control" data-filter="notes">
-        <legend>Notes</legend>
-        <div class="notes-list">
-          {
-            notes.map((note) => (
-              <label class="option">
-                <input type="checkbox" value={slugify(note)} />
-                {note}
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
-      <div class="control sort-control">
-        <label for="sort">Sort by</label>
-        <select id="sort" name="sort">
-          <option value="featured">Featured</option>
-          <option value="best-selling">Best Selling</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="alpha">Alphabetical, A–Z</option>
-        </select>
-      </div>
+        </ul>
+      </details>
     </form>
 
     <p class="count" role="status"></p>
@@ -121,7 +156,16 @@ const notes = [
   const countEl = document.querySelector<HTMLElement>(".count");
   const emptyEl = document.querySelector<HTMLElement>(".empty");
   const searchInput = document.querySelector<HTMLInputElement>("#search");
-  const sortSelect = document.querySelector<HTMLSelectElement>("#sort");
+
+  const filterMenu = document.querySelector<HTMLDetailsElement>(".filter-menu");
+  const filterCountBadge = document.querySelector<HTMLElement>("#filter-count");
+
+  const sortMenu = document.querySelector<HTMLDetailsElement>(".sort-menu");
+  const sortLabel = document.querySelector<HTMLElement>("#sort-label");
+  const sortButtons = Array.from(
+    sortMenu?.querySelectorAll<HTMLButtonElement>("button[data-sort]") ?? [],
+  );
+  let currentSort = "featured";
 
   function checkedValues(filterName: string): string[] {
     return Array.from(
@@ -160,7 +204,7 @@ const notes = [
   }
 
   function sortValue(card: HTMLElement): number {
-    switch (sortSelect?.value) {
+    switch (currentSort) {
       case "best-selling":
         return Number(card.dataset.popularity);
       case "price-asc":
@@ -172,6 +216,15 @@ const notes = [
     }
   }
 
+  function updateFilterCount() {
+    const total = form?.querySelectorAll<HTMLInputElement>(
+      '.filter-menu input[type="checkbox"]:checked',
+    ).length ?? 0;
+    if (!filterCountBadge) return;
+    filterCountBadge.textContent = String(total);
+    filterCountBadge.hidden = total === 0;
+  }
+
   function apply() {
     const visible = cards.filter((card) => {
       const show = matches(card);
@@ -180,7 +233,7 @@ const notes = [
     });
 
     const ordered =
-      sortSelect?.value === "alpha"
+      currentSort === "alpha"
         ? [...visible].sort((a, b) => (a.dataset.name ?? "").localeCompare(b.dataset.name ?? ""))
         : [...visible].sort((a, b) => sortValue(a) - sortValue(b));
 
@@ -188,12 +241,35 @@ const notes = [
       card.style.order = String(i);
     });
 
-    if (countEl) countEl.textContent = `${visible.length} perfume${visible.length === 1 ? "" : "s"}`;
+    if (countEl)
+      countEl.textContent = `${visible.length} perfume${visible.length === 1 ? "" : "s"}`;
     if (emptyEl) emptyEl.hidden = visible.length > 0;
+    updateFilterCount();
   }
 
   form?.addEventListener("input", apply);
   form?.addEventListener("change", apply);
+
+  document.querySelector(".clear-filters")?.addEventListener("click", () => {
+    form
+      ?.querySelectorAll<HTMLInputElement>('.filter-menu input[type="checkbox"]')
+      .forEach((input) => (input.checked = false));
+    apply();
+  });
+
+  document.querySelector(".apply-filters")?.addEventListener("click", () => {
+    if (filterMenu) filterMenu.open = false;
+  });
+
+  sortButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      currentSort = button.dataset.sort ?? "featured";
+      sortButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+      if (sortLabel) sortLabel.textContent = button.textContent?.trim() ?? "";
+      if (sortMenu) sortMenu.open = false;
+      apply();
+    });
+  });
 
   const params = new URLSearchParams(location.search);
   const genderParam = params.get("gender");
@@ -236,6 +312,7 @@ const notes = [
   .filters {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-3);
     background: var(--color-surface);
@@ -248,29 +325,24 @@ const notes = [
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    min-width: 10rem;
     border: none;
     margin: 0;
     padding: 0;
   }
 
-  .control legend,
   .control > label {
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--color-accent);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    padding: 0;
   }
 
-  .search-control,
-  .sort-control {
+  .search-control {
     flex: 1 1 13rem;
   }
 
-  .search-control input,
-  .sort-control select {
+  .search-control input {
     font: inherit;
     padding: 0.5rem 0.7rem;
     border: 1px solid var(--color-border);
@@ -279,14 +351,177 @@ const notes = [
     color: var(--color-ink);
   }
 
-  .search-control input:focus,
-  .sort-control select:focus {
+  .search-control input:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
   }
 
-  fieldset.control {
-    flex: 1 1 15rem;
+  /* Filter + sort menus: a details/summary button that pops a positioned panel,
+     matching the single "Filter" / single "Sort by" dropdown pattern on
+     aerre.co, rather than a row of always-visible controls. */
+  .filter-menu,
+  .sort-menu {
+    position: relative;
+  }
+
+  .filter-menu summary,
+  .sort-menu summary {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.35rem;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .filter-menu summary::-webkit-details-marker,
+  .sort-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .filter-menu summary::after,
+  .sort-menu summary::after {
+    content: " ▾";
+    color: var(--color-muted);
+  }
+
+  .filter-menu[open] summary,
+  .sort-menu[open] summary {
+    border-color: var(--color-accent);
+  }
+
+  .badge[hidden] {
+    display: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    z-index: 20;
+    width: min(90vw, 46rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 10%);
+  }
+
+  .panel fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    grid-column: span 1;
+  }
+
+  .notes-fieldset {
+    grid-column: 1 / -1;
+  }
+
+  .panel legend {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .panel-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .text-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-muted);
+    font: inherit;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .text-button:hover {
+    color: var(--color-accent);
+  }
+
+  .apply-filters {
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.35rem;
+    background: var(--color-ink);
+    color: var(--color-surface);
+    cursor: pointer;
+  }
+
+  .sort-options {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    z-index: 20;
+    min-width: 14rem;
+    margin: 0;
+    padding: var(--space-1) 0;
+    list-style: none;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 10%);
+  }
+
+  .sort-options button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem var(--space-2);
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .sort-options button:hover {
+    background: var(--color-bg);
+  }
+
+  .sort-options button[aria-pressed="true"] {
+    color: var(--color-accent);
+    font-weight: 700;
   }
 
   .option-list {
@@ -301,8 +536,6 @@ const notes = [
     gap: 0.35rem;
     font-size: 0.82rem;
     font-weight: 400;
-    text-transform: none;
-    letter-spacing: normal;
     color: var(--color-ink);
     white-space: nowrap;
     padding: 0.3rem 0.6rem;
@@ -327,14 +560,7 @@ const notes = [
     accent-color: var(--color-accent);
   }
 
-  .notes-control {
-    flex: 1 1 22rem;
-  }
-
   .notes-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
     max-height: 6.5rem;
     overflow-y: auto;
     padding: 0.15rem 0.4rem 0.15rem 0;
@@ -364,12 +590,24 @@ const notes = [
     }
 
     .control,
-    .search-control,
-    .sort-control,
-    .notes-control,
-    fieldset.control {
+    .search-control {
       flex: 0 0 auto;
       min-width: 0;
+      width: 100%;
+    }
+
+    .filter-menu summary,
+    .sort-menu summary {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .panel,
+    .sort-options {
+      position: static;
+      width: 100%;
+      grid-template-columns: 1fr;
+      margin-top: var(--space-1);
     }
   }
 </style>
