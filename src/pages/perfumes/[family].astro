@@ -1,0 +1,52 @@
+---
+import PerfumeCard from "../../components/PerfumeCard.astro";
+import ScentFamilyNav from "../../components/ScentFamilyNav.astro";
+import { PERFUMES, SCENT_FAMILIES, type ScentFamily } from "../../data/perfumes";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((family) => ({
+    params: { family },
+  }));
+}
+
+const { family } = Astro.params as { family: ScentFamily };
+const info = SCENT_FAMILIES[family];
+const perfumes = PERFUMES.filter((p) => p.family === family);
+---
+
+<BaseLayout title={`${info.name} — Àerre, rebuilt`}>
+  <section class="intro">
+    <ScentFamilyNav current={family} />
+    <h1>{info.name}</h1>
+    <p>{info.blurb}</p>
+  </section>
+  <section class="grid">
+    {perfumes.map((perfume) => <PerfumeCard perfume={perfume} />)}
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-3) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .intro p {
+    max-width: 40rem;
+    color: var(--color-muted);
+  }
+
+  .grid {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 var(--space-3) var(--space-5);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+</style>

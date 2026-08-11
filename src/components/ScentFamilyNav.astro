@@ -1,0 +1,56 @@
+---
+import { SCENT_FAMILIES, type ScentFamily } from "../data/perfumes";
+
+interface Props {
+  current?: ScentFamily;
+}
+
+const { current } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const families = Object.entries(SCENT_FAMILIES) as [
+  ScentFamily,
+  (typeof SCENT_FAMILIES)[ScentFamily],
+][];
+---
+
+<nav class="family-nav" aria-label="Scent families">
+  {
+    families.map(([slug, info]) => (
+      <a
+        href={`${base}perfumes/${slug}/`}
+        class="chip"
+        aria-current={slug === current ? "page" : undefined}
+      >
+        {info.name}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .family-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .chip {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .chip[aria-current="page"] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-surface);
+  }
+</style>
