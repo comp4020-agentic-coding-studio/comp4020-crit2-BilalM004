@@ -9,14 +9,6 @@ The Aerre website (Australian Owned Perfume Company - https://aerre.co/) remade.
 Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
 list short so each moment has room to do all four jobs:
 
-1. **what happened** --- the problem, or the thing the agent got wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
-
 Originally, when I told claude to add the images, it transformed the images, without keeping the ratio (i.e. caused images to squeeze, and look inconsistent). I had to point this out and reprompt it to make sure all images were their orignal ratios (and resized appropriately).
 
 The commit for this: [`488b35d`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit2-BilalM004/commit/488b35d)
