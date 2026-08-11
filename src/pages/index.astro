@@ -24,15 +24,17 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title="Àerre, rebuilt — a redesign concept">
   <Hero />
 
-  <section class="categories" id="categories">
-    <h2>Shop by scent</h2>
-    <CategoryCarousel />
+  <section class="categories-band" id="categories">
+    <div class="categories">
+      <h2>Shop by scent</h2>
+      <CategoryCarousel />
+    </div>
   </section>
 
   <section class="highlights">
     <div class="heading-row">
       <h2>Highlights</h2>
-      <a href={`${base}perfumes/`}>See all perfumes →</a>
+      <a href={`${base}perfumes/`} class="cta-pill">See all perfumes →</a>
     </div>
     <div class="grid">
       {highlights.map((perfume) => <PerfumeCard perfume={perfume} />)}
@@ -48,9 +50,16 @@ const base = import.meta.env.BASE_URL;
     padding: var(--space-4) var(--space-3);
   }
 
+  .categories-band {
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg));
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
   @media (max-width: 47.9375rem) {
     .categories {
       padding-top: var(--space-1);
+      padding-bottom: var(--space-2);
     }
   }
 
@@ -69,6 +78,23 @@ const base = import.meta.env.BASE_URL;
 
   .heading-row h2 {
     margin: 0;
+  }
+
+  .cta-pill {
+    display: inline-block;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .cta-pill:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: translateY(-1px);
   }
 
   .grid {

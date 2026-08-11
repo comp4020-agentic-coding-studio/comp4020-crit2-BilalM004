@@ -105,6 +105,17 @@ const families = (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((slug) => ({
     border-radius: 0.5rem;
     overflow: hidden;
     height: 100%;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .category-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-0.2rem);
+    box-shadow: 0 0.75rem 1.5rem -1rem rgba(20, 15, 10, 0.25);
+  }
+
+  .category-card:hover .name {
+    color: var(--color-accent);
   }
 
   .thumb {
