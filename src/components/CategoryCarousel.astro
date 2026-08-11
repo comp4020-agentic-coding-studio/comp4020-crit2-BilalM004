@@ -1,0 +1,176 @@
+---
+import { Image } from "astro:assets";
+
+import { PERFUMES, SCENT_FAMILIES, type ScentFamily } from "../data/perfumes";
+
+const base = import.meta.env.BASE_URL;
+
+// A relevant emoji + a faint colour hint per family — subtle enough to stay
+// close to the site's cream palette, just nudging each card toward its scent.
+const STYLE: Record<ScentFamily, { emoji: string; tint: string }> = {
+  "citrus-fresh": { emoji: "🍋", tint: "#eaf6fb" },
+  floral: { emoji: "🌸", tint: "#fbeef3" },
+  woody: { emoji: "🪵", tint: "#eef3e8" },
+  "amber-spice": { emoji: "🕯️", tint: "#fdf0e2" },
+  gourmand: { emoji: "🍫", tint: "#f7ece2" },
+};
+
+const families = (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((slug) => ({
+  slug,
+  info: SCENT_FAMILIES[slug],
+  cover: PERFUMES.find((p) => p.family === slug)!,
+  style: STYLE[slug],
+}));
+---
+
+<div class="carousel-wrap">
+  <button type="button" class="arrow prev" aria-label="Scroll categories left" data-dir="-1">
+    ‹
+  </button>
+  <ul class="carousel">
+    {
+      families.map(({ slug, info, cover, style }) => (
+        <li>
+          <a
+            class="category-card"
+            href={`${base}perfumes/${slug}/`}
+            style={`background: ${style.tint}`}
+          >
+            <div class="thumb">
+              <Image src={cover.image.src} alt="" width={280} height={280} />
+            </div>
+            <span class="name">
+              <span class="emoji" aria-hidden="true">
+                {style.emoji}
+              </span>
+              {info.name}
+            </span>
+            <span class="blurb">{info.blurb}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <button type="button" class="arrow next" aria-label="Scroll categories right" data-dir="1">
+    ›
+  </button>
+</div>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>(".carousel-wrap");
+  const track = wrap?.querySelector<HTMLElement>(".carousel");
+
+  wrap?.querySelectorAll<HTMLButtonElement>(".arrow").forEach((button) => {
+    button.addEventListener("click", () => {
+      const dir = Number(button.dataset.dir);
+      track?.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: "smooth" });
+    });
+  });
+</script>
+
+<style>
+  .carousel-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .carousel {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carousel li {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: 13rem;
+  }
+
+  .category-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--color-ink);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .thumb {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .category-card .name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    padding: var(--space-2) var(--space-2) 0;
+  }
+
+  .emoji {
+    display: inline-block;
+    font-size: 1.15rem;
+    animation: emoji-sway 2.6s ease-in-out infinite;
+  }
+
+  @keyframes emoji-sway {
+    0%,
+    100% {
+      transform: rotate(0deg) translateY(0);
+    }
+
+    50% {
+      transform: rotate(-8deg) translateY(-2px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .emoji {
+      animation: none;
+    }
+  }
+
+  .category-card .blurb {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    padding: 0.25rem var(--space-2) var(--space-2);
+  }
+
+  .arrow {
+    flex: 0 0 auto;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-ink);
+  }
+
+  .arrow:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

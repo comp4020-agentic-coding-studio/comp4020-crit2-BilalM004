@@ -1,25 +1,74 @@
 ---
-import "../styles/global.css";
+import CategoryCarousel from "../components/CategoryCarousel.astro";
+import Hero from "../components/Hero.astro";
+import PerfumeCard from "../components/PerfumeCard.astro";
+import { PERFUMES } from "../data/perfumes";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const highlightSlugs = [
+  "sunset-in-paris",
+  "wildfire",
+  "black-blaze",
+  "winter-fireworks",
+  "london-city-lights",
+  "deep-blue",
+  "joshua-tree",
+  "velvet-underground",
+];
+const highlights = highlightSlugs.map(
+  (slug) => PERFUMES.find((p) => p.slug === slug)!,
+);
+const base = import.meta.env.BASE_URL;
 ---
-<!doctype html>
-<html lang="en-AU">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
-  </head>
-  <body>
-    <header>
-      <nav aria-label="Primary">
-        <a href={import.meta.env.BASE_URL}>Home</a>
-      </nav>
-    </header>
-    <main>
-      <h1>COMP4020 prototype</h1>
-      <p data-testid="intro">
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
-    </main>
-  </body>
-</html>
+
+<BaseLayout title="Àerre, rebuilt — a redesign concept">
+  <Hero />
+
+  <section class="categories" id="categories">
+    <h2>Shop by scent</h2>
+    <CategoryCarousel />
+  </section>
+
+  <section class="highlights">
+    <div class="heading-row">
+      <h2>Highlights</h2>
+      <a href={`${base}perfumes/`}>See all perfumes →</a>
+    </div>
+    <div class="grid">
+      {highlights.map((perfume) => <PerfumeCard perfume={perfume} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .categories,
+  .highlights {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .categories h2,
+  .highlights h2 {
+    margin: 0 0 var(--space-2);
+  }
+
+  .heading-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .heading-row h2 {
+    margin: 0;
+  }
+
+  .grid {
+    margin-top: var(--space-2);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+</style>
