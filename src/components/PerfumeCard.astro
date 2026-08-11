@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 
-import { SCENT_FAMILIES, type Perfume } from "../data/perfumes";
+import { SCENT_FAMILIES, slugify, type Perfume } from "../data/perfumes";
 
 interface Props {
   perfume: Perfume;
@@ -11,9 +11,19 @@ const { perfume } = Astro.props;
 const genderLabel = perfume.genders
   .map((g) => (g === "unisex" ? "Unisex" : g === "women" ? "Women" : "Men"))
   .join(" / ");
+const allNotes = [...perfume.notes.top, ...perfume.notes.heart, ...perfume.notes.base];
 ---
 
-<article class="card">
+<article
+  class="card"
+  data-name={perfume.name}
+  data-family={perfume.family}
+  data-genders={perfume.genders.join(" ")}
+  data-brand={slugify(perfume.inspiredBy.brand)}
+  data-notes={allNotes.map(slugify).join(" ")}
+  data-price={perfume.price}
+  data-popularity={perfume.popularity}
+>
   <a class="thumb" href={perfume.sourceUrl} target="_blank" rel="noopener noreferrer">
     <Image src={perfume.image.src} alt={perfume.image.alt} width={400} height={400} />
   </a>

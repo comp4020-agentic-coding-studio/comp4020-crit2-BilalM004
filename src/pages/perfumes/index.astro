@@ -1,42 +1,216 @@
 ---
 import PerfumeCard from "../../components/PerfumeCard.astro";
-import { PERFUMES, SCENT_FAMILIES, type ScentFamily } from "../../data/perfumes";
+import { PERFUMES, SCENT_FAMILIES, slugify, type ScentFamily } from "../../data/perfumes";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const families = (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((slug) => ({
-  slug,
-  info: SCENT_FAMILIES[slug],
-  perfumes: PERFUMES.filter((p) => p.family === slug),
-}));
+const families = Object.keys(SCENT_FAMILIES) as ScentFamily[];
+
+const GENDERS = ["women", "men", "unisex"] as const;
+const GENDER_LABEL: Record<(typeof GENDERS)[number], string> = {
+  women: "Women",
+  men: "Men",
+  unisex: "Unisex",
+};
+
+const brands = [...new Set(PERFUMES.map((p) => p.inspiredBy.brand))].sort((a, b) =>
+  a.localeCompare(b),
+);
+
+const notes = [
+  ...new Set(PERFUMES.flatMap((p) => [...p.notes.top, ...p.notes.heart, ...p.notes.base])),
+].sort((a, b) => a.localeCompare(b));
 ---
 
 <BaseLayout title="All Perfumes — Àerre, rebuilt">
   <section class="intro">
     <h1>All Perfumes</h1>
-    <p>Every fragrance, grouped by scent family instead of buried under a discount tier.</p>
-    <nav class="jump" aria-label="Jump to scent family">
-      {
-        families.map(({ slug, info }) => (
-          <a href={`#${slug}`}>{info.name}</a>
-        ))
-      }
-    </nav>
+    <p>
+      Every fragrance in one place — filter by gender, scent family, the luxury brand it's
+      inspired by, or a note, then sort however suits you.
+    </p>
   </section>
 
-  {
-    families.map(({ slug, info, perfumes }) => (
-      <section class="family" id={slug}>
-        <h2>{info.name}</h2>
-        <p class="blurb">{info.blurb}</p>
-        <div class="grid">
-          {perfumes.map((perfume) => (
-            <PerfumeCard perfume={perfume} />
-          ))}
+  <section class="catalog">
+    <form class="filters" aria-label="Filter and sort perfumes">
+      <div class="control search-control">
+        <label for="search">Search</label>
+        <input type="search" id="search" name="search" placeholder="Perfume or brand…" autocomplete="off" />
+      </div>
+
+      <fieldset class="control" data-filter="gender">
+        <legend>Gender</legend>
+        <div class="option-list">
+          {
+            GENDERS.map((g) => (
+              <label class="option">
+                <input type="checkbox" value={g} />
+                {GENDER_LABEL[g]}
+              </label>
+            ))
+          }
         </div>
-      </section>
-    ))
-  }
+      </fieldset>
+
+      <fieldset class="control" data-filter="family">
+        <legend>Scent family</legend>
+        <div class="option-list">
+          {
+            families.map((slug) => (
+              <label class="option">
+                <input type="checkbox" value={slug} />
+                {SCENT_FAMILIES[slug].name}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="control" data-filter="brand">
+        <legend>Inspired by</legend>
+        <div class="option-list">
+          {
+            brands.map((brand) => (
+              <label class="option">
+                <input type="checkbox" value={slugify(brand)} />
+                {brand}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="control notes-control" data-filter="notes">
+        <legend>Notes</legend>
+        <div class="notes-list">
+          {
+            notes.map((note) => (
+              <label class="option">
+                <input type="checkbox" value={slugify(note)} />
+                {note}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="control sort-control">
+        <label for="sort">Sort by</label>
+        <select id="sort" name="sort">
+          <option value="featured">Featured</option>
+          <option value="best-selling">Best Selling</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="alpha">Alphabetical, A–Z</option>
+        </select>
+      </div>
+    </form>
+
+    <p class="count" role="status"></p>
+
+    <div class="grid">
+      {PERFUMES.map((perfume) => <PerfumeCard perfume={perfume} />)}
+    </div>
+    <p class="empty" hidden>No perfumes match those filters — try clearing a few.</p>
+  </section>
 </BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>(".filters");
+  const grid = document.querySelector<HTMLElement>(".grid");
+  const cards = Array.from(grid?.querySelectorAll<HTMLElement>(".card") ?? []);
+  const countEl = document.querySelector<HTMLElement>(".count");
+  const emptyEl = document.querySelector<HTMLElement>(".empty");
+  const searchInput = document.querySelector<HTMLInputElement>("#search");
+  const sortSelect = document.querySelector<HTMLSelectElement>("#sort");
+
+  function checkedValues(filterName: string): string[] {
+    return Array.from(
+      form?.querySelectorAll<HTMLInputElement>(
+        `[data-filter="${filterName}"] input[type="checkbox"]:checked`,
+      ) ?? [],
+    ).map((input) => input.value);
+  }
+
+  function matchesSearch(card: HTMLElement, query: string): boolean {
+    if (!query) return true;
+    const name = card.dataset.name?.toLowerCase() ?? "";
+    const brand = (card.dataset.brand ?? "").replace(/-/g, " ");
+    return name.includes(query) || brand.includes(query);
+  }
+
+  function matches(card: HTMLElement): boolean {
+    const query = searchInput?.value.trim().toLowerCase() ?? "";
+    if (!matchesSearch(card, query)) return false;
+
+    const genders = checkedValues("gender");
+    const cardGenders = card.dataset.genders?.split(" ") ?? [];
+    if (genders.length && !genders.some((g) => cardGenders.includes(g))) return false;
+
+    const families = checkedValues("family");
+    if (families.length && !families.includes(card.dataset.family ?? "")) return false;
+
+    const brands = checkedValues("brand");
+    if (brands.length && !brands.includes(card.dataset.brand ?? "")) return false;
+
+    const notes = checkedValues("notes");
+    const cardNotes = card.dataset.notes?.split(" ") ?? [];
+    if (notes.length && !notes.every((n) => cardNotes.includes(n))) return false;
+
+    return true;
+  }
+
+  function sortValue(card: HTMLElement): number {
+    switch (sortSelect?.value) {
+      case "best-selling":
+        return Number(card.dataset.popularity);
+      case "price-asc":
+        return Number(card.dataset.price);
+      case "price-desc":
+        return -Number(card.dataset.price);
+      default:
+        return cards.indexOf(card);
+    }
+  }
+
+  function apply() {
+    const visible = cards.filter((card) => {
+      const show = matches(card);
+      card.style.display = show ? "" : "none";
+      return show;
+    });
+
+    const ordered =
+      sortSelect?.value === "alpha"
+        ? [...visible].sort((a, b) => (a.dataset.name ?? "").localeCompare(b.dataset.name ?? ""))
+        : [...visible].sort((a, b) => sortValue(a) - sortValue(b));
+
+    ordered.forEach((card, i) => {
+      card.style.order = String(i);
+    });
+
+    if (countEl) countEl.textContent = `${visible.length} perfume${visible.length === 1 ? "" : "s"}`;
+    if (emptyEl) emptyEl.hidden = visible.length > 0;
+  }
+
+  form?.addEventListener("input", apply);
+  form?.addEventListener("change", apply);
+
+  const params = new URLSearchParams(location.search);
+  const genderParam = params.get("gender");
+  const brandParam = params.get("brand");
+  form
+    ?.querySelectorAll<HTMLInputElement>('[data-filter="gender"] input[type="checkbox"]')
+    .forEach((input) => {
+      if (input.value === genderParam) input.checked = true;
+    });
+  form
+    ?.querySelectorAll<HTMLInputElement>('[data-filter="brand"] input[type="checkbox"]')
+    .forEach((input) => {
+      if (input.value === brandParam) input.checked = true;
+    });
+
+  apply();
+</script>
 
 <style>
   .intro {
@@ -53,47 +227,149 @@ const families = (Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((slug) => ({
     color: var(--color-muted);
   }
 
-  .jump {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-  }
-
-  .jump a {
-    padding: 0.35rem 0.9rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    color: var(--color-ink);
-    font-size: 0.9rem;
-    text-decoration: none;
-  }
-
-  .jump a:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
-  .family {
+  .catalog {
     max-width: 72rem;
     margin: 0 auto;
-    padding: var(--space-3) var(--space-3) var(--space-4);
-    scroll-margin-top: var(--space-3);
+    padding: 0 var(--space-3) var(--space-4);
   }
 
-  .family h2 {
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 10rem;
+    border: none;
     margin: 0;
+    padding: 0;
   }
 
-  .family .blurb {
-    max-width: 40rem;
+  .control legend,
+  .control > label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0;
+  }
+
+  .search-control,
+  .sort-control {
+    flex: 1 1 13rem;
+  }
+
+  .search-control input,
+  .sort-control select {
+    font: inherit;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.35rem;
+    background: var(--color-bg);
+    color: var(--color-ink);
+  }
+
+  .search-control input:focus,
+  .sort-control select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  fieldset.control {
+    flex: 1 1 15rem;
+  }
+
+  .option-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--color-ink);
+    white-space: nowrap;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .option:hover {
+    border-color: var(--color-accent);
+  }
+
+  .option:has(input:checked) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+  }
+
+  .option input {
+    accent-color: var(--color-accent);
+  }
+
+  .notes-control {
+    flex: 1 1 22rem;
+  }
+
+  .notes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-height: 6.5rem;
+    overflow-y: auto;
+    padding: 0.15rem 0.4rem 0.15rem 0;
+  }
+
+  .count {
+    margin: 0 0 var(--space-2);
     color: var(--color-muted);
-    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
   }
 
   .grid {
-    margin-top: var(--space-2);
     display: grid;
     gap: var(--space-3);
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+
+  .empty {
+    color: var(--color-muted);
+    padding: var(--space-4) 0;
+    text-align: center;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .filters {
+      flex-direction: column;
+    }
+
+    .control,
+    .search-control,
+    .sort-control,
+    .notes-control,
+    fieldset.control {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
   }
 </style>
