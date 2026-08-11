@@ -93,6 +93,10 @@ import { PRESS_MENTIONS, PRESS_STYLES, QUOTES, RATING } from "../data/testimonia
   quotes?.addEventListener("focusout", start);
 
   start();
+
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => stop());
+  }
 </script>
 
 <style>

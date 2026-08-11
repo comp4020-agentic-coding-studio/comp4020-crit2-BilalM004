@@ -118,7 +118,7 @@ const slides = [
 
   function start() {
     if (reduceMotion) return;
-    timer = window.setInterval(() => show(current() + 1), 6000);
+    timer = window.setInterval(() => show(current() + 1), 3000);
   }
 
   function stop() {
@@ -136,6 +136,10 @@ const slides = [
   rotator?.addEventListener("focusout", start);
 
   start();
+
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => stop());
+  }
 </script>
 
 <style>
