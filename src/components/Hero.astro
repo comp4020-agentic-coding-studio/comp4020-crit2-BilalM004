@@ -7,12 +7,12 @@ const base = import.meta.env.BASE_URL;
 
 <section class="hero">
   <div class="copy">
-    <h1>Àerre, rebuilt</h1>
-    <p>
-      Real Àerre fragrances, real notes, real prices — organised by scent
-      instead of by discount. No popup, no subscription pitch: just the
-      products.
-    </p>
+    <p class="kicker">Stop overpaying for luxury fragrance</p>
+    <h1>
+      Australia's best, long-lasting, designer-quality perfumes inspired by famous luxury
+      brands, from $29<span class="disclaimer"> (on the official website)</span>
+    </h1>
+    <p class="guarantee">30-day money-back guarantee if you don't love it.</p>
     <div class="cta-row">
       <a class="cta primary" href={`${base}perfumes/`}>See all perfumes</a>
       <a class="cta secondary" href="#categories">Shop by scent</a>
@@ -49,6 +49,50 @@ const base = import.meta.env.BASE_URL;
   .copy p {
     color: var(--color-muted);
     max-width: 32rem;
+  }
+
+  .kicker {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+  }
+
+  h1 {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1.4rem, 3.2vw + 1rem, 2.6rem);
+    line-height: 1.15;
+  }
+
+  .disclaimer {
+    font-size: 0.5em;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .guarantee {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .kicker {
+      font-size: 0.65rem;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      line-height: 1.25;
+      margin-top: 0.2rem;
+    }
+
+    .guarantee {
+      font-size: 0.7rem;
+      margin-top: 0.2rem;
+    }
   }
 
   .cta-row {
