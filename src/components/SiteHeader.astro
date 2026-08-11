@@ -16,47 +16,52 @@ const brands = [...new Set(PERFUMES.map((p) => p.inspiredBy.brand))].sort((a, b)
 <header class="site-header">
   <div class="row">
     <a class="wordmark" href={base}>
-      <span class="mark">Àerre</span>
+      <span class="mark">àerre</span>
       <span class="tag">(rebuilt)</span>
     </a>
     <nav aria-label="Primary">
       <a href={base}>Home</a>
       <a href={`${base}perfumes/`}>All Perfumes</a>
       <details class="categories">
-        <summary>Scent</summary>
-        <ul>
-          {
-            families.map(([slug, info]) => (
-              <li>
-                <a href={`${base}perfumes/${slug}/`}>{info.name}</a>
-              </li>
-            ))
-          }
-        </ul>
-      </details>
-      <details class="categories">
-        <summary>Gender</summary>
-        <ul>
-          {
-            genders.map(({ slug, name }) => (
-              <li>
-                <a href={`${base}perfumes/?gender=${slug}`}>{name}</a>
-              </li>
-            ))
-          }
-        </ul>
-      </details>
-      <details class="categories">
-        <summary>Inspired By</summary>
-        <ul>
-          {
-            brands.map((brand) => (
-              <li>
-                <a href={`${base}perfumes/?brand=${slugify(brand)}`}>{brand}</a>
-              </li>
-            ))
-          }
-        </ul>
+        <summary>Categories</summary>
+        <div class="menu">
+          <div class="group">
+            <h4>Scent</h4>
+            <ul>
+              {
+                families.map(([slug, info]) => (
+                  <li>
+                    <a href={`${base}perfumes/${slug}/`}>{info.name}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <div class="group">
+            <h4>Gender</h4>
+            <ul>
+              {
+                genders.map(({ slug, name }) => (
+                  <li>
+                    <a href={`${base}perfumes/?gender=${slug}`}>{name}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <div class="group">
+            <h4>Inspired By</h4>
+            <ul>
+              {
+                brands.map((brand) => (
+                  <li>
+                    <a href={`${base}perfumes/?brand=${slugify(brand)}`}>{brand}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
       </details>
       <a href="https://aerre.co/" target="_blank" rel="noopener noreferrer" class="source-link">
         See the real Àerre store ↗
@@ -150,28 +155,55 @@ const brands = [...new Set(PERFUMES.map((p) => p.inspiredBy.brand))].sort((a, b)
     content: " ▴";
   }
 
-  .categories ul {
+  .categories .menu {
     position: absolute;
     top: calc(100% + var(--space-1));
     left: 0;
+    display: flex;
+    gap: var(--space-3);
     margin: 0;
-    padding: var(--space-1) 0;
-    list-style: none;
+    padding: var(--space-2);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 0.25rem;
     box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 8%);
-    min-width: 12rem;
     z-index: 10;
+  }
+
+  .group h4 {
+    margin: 0 0 var(--space-1);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .categories ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 14rem;
+    overflow-y: auto;
+    min-width: 10rem;
   }
 
   .categories li a {
     display: block;
-    padding: var(--space-1) var(--space-2);
+    padding: 0.3rem var(--space-1);
+    border-radius: 0.2rem;
     white-space: nowrap;
   }
 
   .categories li a:hover {
     background: var(--color-bg);
+  }
+
+  @media (max-width: 47.9375rem) {
+    .categories .menu {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
   }
 </style>
