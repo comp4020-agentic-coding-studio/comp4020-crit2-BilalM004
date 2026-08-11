@@ -1,0 +1,6 @@
+1. What was the breakthrough that moved the work forward?
+
+Understanding limitations of ideas - originally I was going to work on the Transport Canberra site, but the changes I thought were most important, I was unable to implement (due to no access to the necssary APIs). The key breakthrough within this Aerre website remake project, was discussing ideas and implementations with Claude, asking it to critique/analyse too. Then, when developing, I felt I could work best when breaking the work into deliverables, and going through each deliverable with Claude, so i could keep aligning it to the vision I had, as the project grew.
+
+2. What did this work change about who I want to be as a software developer?
+Being able to implement and test ideas, rapidly, makes it more viable to implement various ideas (and discard them if not desired). This made me feel I could be more creative, without spending a lot of time implementing something which I may discard anyways (which would be demotivating). This makes me feel, as a software developer, I can focus more on creativity, without the constraints of implementing by hand. Something thats surprising is how efficient and well it is writing code, and it will be interesting to see the direction this field goes in the future.
