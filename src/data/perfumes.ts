@@ -75,6 +75,20 @@ export interface Perfume {
   family: ScentFamily;
   image: { src: ImageMetadata; alt: string };
   sourceUrl: string;
+  // Editorial rank used for the "Best Selling" sort — aerre.co doesn't
+  // publish per-product sales figures, so this mirrors the curated homepage
+  // "Highlights" picks (lower = more popular) rather than claiming real data.
+  popularity: number;
+}
+
+// Shared lowercase, hyphenated form for brand/note filter values and links,
+// e.g. "Viktor&Rolf" -> "viktor-rolf".
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, "-")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export const PERFUMES: Perfume[] = [
@@ -92,6 +106,7 @@ export const PERFUMES: Perfume[] = [
     family: "floral",
     image: { src: sunsetInParis, alt: "Bottle of Sunset in Paris perfume" },
     sourceUrl: "https://aerre.co/products/sunset-in-paris",
+    popularity: 0,
   },
   {
     slug: "summer-reverie",
@@ -107,6 +122,7 @@ export const PERFUMES: Perfume[] = [
     family: "floral",
     image: { src: summerReverie, alt: "Bottle of Summer Reverie perfume" },
     sourceUrl: "https://aerre.co/products/summer-reverie",
+    popularity: 8,
   },
   {
     slug: "golden-hour",
@@ -122,6 +138,7 @@ export const PERFUMES: Perfume[] = [
     family: "floral",
     image: { src: goldenHour, alt: "Bottle of Golden Hour perfume" },
     sourceUrl: "https://aerre.co/products/golden-hour",
+    popularity: 9,
   },
   {
     slug: "deep-blue",
@@ -137,6 +154,7 @@ export const PERFUMES: Perfume[] = [
     family: "floral",
     image: { src: deepBlue, alt: "Bottle of Deep Blue perfume" },
     sourceUrl: "https://aerre.co/products/deep-blue",
+    popularity: 5,
   },
   {
     slug: "midnight-whisper",
@@ -152,6 +170,7 @@ export const PERFUMES: Perfume[] = [
     family: "floral",
     image: { src: midnightWhisper, alt: "Bottle of Midnight Whisper perfume" },
     sourceUrl: "https://aerre.co/products/midnight-whisper",
+    popularity: 10,
   },
   {
     slug: "london-city-lights",
@@ -170,6 +189,7 @@ export const PERFUMES: Perfume[] = [
       alt: "Bottle of London City Lights perfume",
     },
     sourceUrl: "https://aerre.co/products/london-city-lights",
+    popularity: 4,
   },
   {
     slug: "velvet-underground",
@@ -188,6 +208,7 @@ export const PERFUMES: Perfume[] = [
       alt: "Bottle of Velvet Underground perfume",
     },
     sourceUrl: "https://aerre.co/products/velvet-underground",
+    popularity: 7,
   },
   {
     slug: "after-hours",
@@ -203,6 +224,7 @@ export const PERFUMES: Perfume[] = [
     family: "gourmand",
     image: { src: afterHours, alt: "Bottle of After Hours perfume" },
     sourceUrl: "https://aerre.co/products/after-hours",
+    popularity: 11,
   },
   {
     slug: "wildfire",
@@ -218,6 +240,7 @@ export const PERFUMES: Perfume[] = [
     family: "citrus-fresh",
     image: { src: wildfire, alt: "Bottle of Wildfire perfume" },
     sourceUrl: "https://aerre.co/products/wildfire",
+    popularity: 1,
   },
   {
     slug: "new-york-skyline",
@@ -233,6 +256,7 @@ export const PERFUMES: Perfume[] = [
     family: "citrus-fresh",
     image: { src: newYorkSkyline, alt: "Bottle of New York Skyline perfume" },
     sourceUrl: "https://aerre.co/products/new-york-skyline",
+    popularity: 12,
   },
   {
     slug: "nightfall",
@@ -248,6 +272,7 @@ export const PERFUMES: Perfume[] = [
     family: "citrus-fresh",
     image: { src: nightfall, alt: "Bottle of Nightfall perfume" },
     sourceUrl: "https://aerre.co/products/nightfall",
+    popularity: 13,
   },
   {
     slug: "black-blaze",
@@ -263,6 +288,7 @@ export const PERFUMES: Perfume[] = [
     family: "woody",
     image: { src: blackBlaze, alt: "Bottle of Black Blaze perfume" },
     sourceUrl: "https://aerre.co/products/black-blaze",
+    popularity: 2,
   },
   {
     slug: "joshua-tree",
@@ -278,6 +304,7 @@ export const PERFUMES: Perfume[] = [
     family: "woody",
     image: { src: joshuaTree, alt: "Bottle of Joshua Tree perfume" },
     sourceUrl: "https://aerre.co/products/joshua-tree",
+    popularity: 6,
   },
   {
     slug: "forest-spice",
@@ -293,6 +320,7 @@ export const PERFUMES: Perfume[] = [
     family: "woody",
     image: { src: forestSpice, alt: "Bottle of Forest Spice perfume" },
     sourceUrl: "https://aerre.co/products/forest-spice",
+    popularity: 14,
   },
   {
     slug: "winter-fireworks",
@@ -308,6 +336,7 @@ export const PERFUMES: Perfume[] = [
     family: "amber-spice",
     image: { src: winterFireworks, alt: "Bottle of Winter Fireworks perfume" },
     sourceUrl: "https://aerre.co/products/winter-fireworks",
+    popularity: 3,
   },
   {
     slug: "bliss-release",
@@ -323,6 +352,7 @@ export const PERFUMES: Perfume[] = [
     family: "amber-spice",
     image: { src: blissRelease, alt: "Bottle of Bliss Release perfume" },
     sourceUrl: "https://aerre.co/products/bliss-release",
+    popularity: 15,
   },
   {
     slug: "amber-haze",
@@ -338,5 +368,6 @@ export const PERFUMES: Perfume[] = [
     family: "amber-spice",
     image: { src: amberHaze, alt: "Bottle of Amber Haze perfume" },
     sourceUrl: "https://aerre.co/products/amber-haze",
+    popularity: 16,
   },
 ];
