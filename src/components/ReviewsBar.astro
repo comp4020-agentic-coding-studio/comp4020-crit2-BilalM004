@@ -48,6 +48,8 @@ import { PRESS_MENTIONS, PRESS_STYLES, QUOTES, RATING } from "../data/testimonia
   const slides = Array.from(bar?.querySelectorAll<HTMLElement>(".quote") ?? []);
   const tabs = Array.from(bar?.querySelectorAll<HTMLButtonElement>(".press-item") ?? []);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const controller = new AbortController();
+  const { signal } = controller;
 
   function show(index: number) {
     const target = ((index % slides.length) + slides.length) % slides.length;
@@ -65,10 +67,14 @@ import { PRESS_MENTIONS, PRESS_STYLES, QUOTES, RATING } from "../data/testimonia
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      show(Number(tab.dataset.goto));
-      restart();
-    });
+    tab.addEventListener(
+      "click",
+      () => {
+        show(Number(tab.dataset.goto));
+        restart();
+      },
+      { signal },
+    );
   });
 
   let timer: number | undefined;
@@ -87,15 +93,18 @@ import { PRESS_MENTIONS, PRESS_STYLES, QUOTES, RATING } from "../data/testimonia
     start();
   }
 
-  quotes?.addEventListener("mouseenter", stop);
-  quotes?.addEventListener("mouseleave", start);
-  quotes?.addEventListener("focusin", stop);
-  quotes?.addEventListener("focusout", start);
+  quotes?.addEventListener("mouseenter", stop, { signal });
+  quotes?.addEventListener("mouseleave", start, { signal });
+  quotes?.addEventListener("focusin", stop, { signal });
+  quotes?.addEventListener("focusout", start, { signal });
 
   start();
 
   if (import.meta.hot) {
-    import.meta.hot.dispose(() => stop());
+    import.meta.hot.dispose(() => {
+      stop();
+      controller.abort();
+    });
   }
 </script>
 

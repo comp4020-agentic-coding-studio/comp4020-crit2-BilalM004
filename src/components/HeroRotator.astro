@@ -83,6 +83,8 @@ const slides = [
   const slides = Array.from(rotator?.querySelectorAll<HTMLElement>(".slide") ?? []);
   const dots = Array.from(rotator?.querySelectorAll<HTMLButtonElement>(".dot") ?? []);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const controller = new AbortController();
+  const { signal } = controller;
 
   function show(index: number) {
     const target = ((index % slides.length) + slides.length) % slides.length;
@@ -101,17 +103,25 @@ const slides = [
   }
 
   rotator?.querySelectorAll<HTMLButtonElement>(".arrow").forEach((button) => {
-    button.addEventListener("click", () => {
-      show(current() + Number(button.dataset.dir));
-      restart();
-    });
+    button.addEventListener(
+      "click",
+      () => {
+        show(current() + Number(button.dataset.dir));
+        restart();
+      },
+      { signal },
+    );
   });
 
   dots.forEach((dot) => {
-    dot.addEventListener("click", () => {
-      show(Number(dot.dataset.goto));
-      restart();
-    });
+    dot.addEventListener(
+      "click",
+      () => {
+        show(Number(dot.dataset.goto));
+        restart();
+      },
+      { signal },
+    );
   });
 
   let timer: number | undefined;
@@ -130,15 +140,18 @@ const slides = [
     start();
   }
 
-  rotator?.addEventListener("mouseenter", stop);
-  rotator?.addEventListener("mouseleave", start);
-  rotator?.addEventListener("focusin", stop);
-  rotator?.addEventListener("focusout", start);
+  rotator?.addEventListener("mouseenter", stop, { signal });
+  rotator?.addEventListener("mouseleave", start, { signal });
+  rotator?.addEventListener("focusin", stop, { signal });
+  rotator?.addEventListener("focusout", start, { signal });
 
   start();
 
   if (import.meta.hot) {
-    import.meta.hot.dispose(() => stop());
+    import.meta.hot.dispose(() => {
+      stop();
+      controller.abort();
+    });
   }
 </script>
 
